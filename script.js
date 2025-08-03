@@ -6,17 +6,35 @@ import {
 
 async function renderList(filter = "") {
   const listEl = document.getElementById("product-grid");
-  if (!listEl) return;
-  listEl.innerHTML = "";
+  if (!listEl) {
+    console.warn("⚠️ Tidak menemukan elemen #product-grid");
+    return;
+  }
+  listEl.innerHTML = "<p>🔄 Memuat produk...</p>";
 
   try {
+    // 🔥 Ambil data dari Firestore
     const snapshot = await getDocs(collection(db, "umkm"));
-    let data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+    console.log(`✅ ${snapshot.size} produk ditemukan di Firestore`);
 
+    let data = snapshot.docs.map(docSnap => ({
+      id: docSnap.id,
+      ...docSnap.data()
+    }));
+
+    // 🔍 Filter kalau ada pencarian
     const filtered = data.filter(item =>
       item.name.toLowerCase().includes(filter.toLowerCase())
     );
 
+    // 🔄 Kosongkan grid
+    listEl.innerHTML = "";
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = "<p>📭 Belum ada produk ditemukan</p>";
+    }
+
+    // 🎨 Render produk
     filtered.forEach((item) => {
       const card = document.createElement("div");
       card.className = "card";
@@ -30,6 +48,7 @@ async function renderList(filter = "") {
         ` : ""}
       `;
 
+      // 🔍 Kalau di index.html (bukan admin), klik kartu → detail modal
       if (!location.pathname.includes("admin")) {
         card.style.cursor = "pointer";
         card.addEventListener("click", () => showModal(item));
@@ -38,10 +57,12 @@ async function renderList(filter = "") {
       listEl.appendChild(card);
     });
   } catch (err) {
-    console.error("❌ Gagal mengambil data:", err);
+    console.error("❌ Gagal ambil data Firestore:", err);
+    listEl.innerHTML = "<p>⚠️ Gagal memuat produk</p>";
   }
 }
 
+// ✏️ Fungsi edit produk (Admin)
 window.editItem = async (id) => {
   const snapshot = await getDocs(collection(db, "umkm"));
   const itemDoc = snapshot.docs.find(d => d.id === id);
@@ -55,6 +76,7 @@ window.editItem = async (id) => {
   document.getElementById("kontak").value = item.kontak;
 };
 
+// ❌ Hapus produk
 window.deleteItem = async (id) => {
   if (confirm("Yakin ingin menghapus produk ini?")) {
     await deleteDoc(doc(db, "umkm", id));
@@ -63,6 +85,7 @@ window.deleteItem = async (id) => {
   }
 };
 
+// 📝 Simpan produk dari admin
 const form = document.getElementById("umkm-form");
 if (form) {
   form.addEventListener("submit", async function (e) {
@@ -78,12 +101,11 @@ if (form) {
     try {
       if (id === "") {
         await addDoc(collection(db, "umkm"), item);
-        console.log("✅ Produk baru berhasil ditambahkan:", item);
+        console.log("✅ Produk baru ditambahkan:", item);
       } else {
         await updateDoc(doc(db, "umkm", id), item);
-        console.log("✏️ Produk berhasil diperbarui:", item);
+        console.log("✏️ Produk diperbarui:", item);
       }
-
       form.reset();
       renderList();
     } catch (err) {
@@ -92,11 +114,13 @@ if (form) {
   });
 }
 
+// 🔍 Search real-time
 const search = document.getElementById("search");
 if (search) {
   search.addEventListener("input", () => renderList(search.value));
 }
 
+// 📌 Modal produk
 const modal = document.getElementById("product-modal");
 const modalImg = document.getElementById("modal-image");
 const modalTitle = document.getElementById("modal-title");
@@ -116,4 +140,5 @@ function showModal(item) {
 if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
 window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
 
+// 🚀 Panggil render awal
 renderList();
