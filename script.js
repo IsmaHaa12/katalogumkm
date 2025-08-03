@@ -4,48 +4,50 @@ import {
   deleteDoc, doc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-// 🔄 Render produk
 async function renderList(filter = "") {
   const listEl = document.getElementById("product-grid");
   if (!listEl) return;
   listEl.innerHTML = "";
 
-  const snapshot = await getDocs(collection(db, "umkm"));
-  let data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+  try {
+    const snapshot = await getDocs(collection(db, "umkm"));
+    let data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
 
-  const filtered = data.filter(item =>
-    item.name.toLowerCase().includes(filter.toLowerCase())
-  );
+    const filtered = data.filter(item =>
+      item.name.toLowerCase().includes(filter.toLowerCase())
+    );
 
-  filtered.forEach((item) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <img src="${item.image}" alt="${item.name}">
-      <h3>${item.name}</h3>
-      <p><strong>Kontak:</strong> ${item.kontak}</p>
-      ${location.pathname.includes("admin") ? `
-        <button onclick="editItem('${item.id}')">Edit</button>
-        <button onclick="deleteItem('${item.id}')">Hapus</button>
-      ` : ""}
-    `;
+    filtered.forEach((item) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <img src="${item.image}" alt="${item.name}">
+        <h3>${item.name}</h3>
+        <p><strong>Kontak:</strong> ${item.kontak}</p>
+        ${location.pathname.includes("admin") ? `
+          <button onclick="editItem('${item.id}')">Edit</button>
+          <button onclick="deleteItem('${item.id}')">Hapus</button>
+        ` : ""}
+      `;
 
-    // 📌 klik card untuk lihat detail
-    if (!location.pathname.includes("admin")) {
-      card.style.cursor = "pointer";
-      card.addEventListener("click", () => showModal(item));
-    }
+      if (!location.pathname.includes("admin")) {
+        card.style.cursor = "pointer";
+        card.addEventListener("click", () => showModal(item));
+      }
 
-    listEl.appendChild(card);
-  });
+      listEl.appendChild(card);
+    });
+  } catch (err) {
+    console.error("❌ Gagal mengambil data:", err);
+  }
 }
 
-// ✏️ Edit produk
 window.editItem = async (id) => {
-  const docRef = doc(db, "umkm", id);
-  const snap = await getDocs(collection(db, "umkm"));
-  const item = snap.docs.find(d => d.id === id).data();
+  const snapshot = await getDocs(collection(db, "umkm"));
+  const itemDoc = snapshot.docs.find(d => d.id === id);
+  if (!itemDoc) return alert("Produk tidak ditemukan!");
 
+  const item = itemDoc.data();
   document.getElementById("product-id").value = id;
   document.getElementById("name").value = item.name;
   document.getElementById("image").value = item.image;
@@ -53,15 +55,14 @@ window.editItem = async (id) => {
   document.getElementById("kontak").value = item.kontak;
 };
 
-// ❌ Hapus produk
 window.deleteItem = async (id) => {
   if (confirm("Yakin ingin menghapus produk ini?")) {
     await deleteDoc(doc(db, "umkm", id));
+    console.log(`🗑 Produk dengan ID ${id} dihapus`);
     renderList();
   }
 };
 
-// 📄 Form simpan produk (Admin)
 const form = document.getElementById("umkm-form");
 if (form) {
   form.addEventListener("submit", async function (e) {
@@ -74,24 +75,28 @@ if (form) {
       kontak: document.getElementById("kontak").value,
     };
 
-    if (id === "") {
-      await addDoc(collection(db, "umkm"), item);
-    } else {
-      await updateDoc(doc(db, "umkm", id), item);
-    }
+    try {
+      if (id === "") {
+        await addDoc(collection(db, "umkm"), item);
+        console.log("✅ Produk baru berhasil ditambahkan:", item);
+      } else {
+        await updateDoc(doc(db, "umkm", id), item);
+        console.log("✏️ Produk berhasil diperbarui:", item);
+      }
 
-    form.reset();
-    renderList();
+      form.reset();
+      renderList();
+    } catch (err) {
+      console.error("❌ Gagal menyimpan produk:", err);
+    }
   });
 }
 
-// 🔍 Search
 const search = document.getElementById("search");
 if (search) {
   search.addEventListener("input", () => renderList(search.value));
 }
 
-// 📌 Modal detail produk
 const modal = document.getElementById("product-modal");
 const modalImg = document.getElementById("modal-image");
 const modalTitle = document.getElementById("modal-title");
