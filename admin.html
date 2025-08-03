@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin UMKM</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Halaman Admin UMKM</h1>
+        <a href="index.html" class="kembali-btn">⬅ Kembali ke Halaman Utama</a>
+    </header>
+
+    <div class="container">
+        <section class="form-section">
+            <h2>Tambah / Edit Produk</h2>
+            <form id="umkm-form">
+                <input type="hidden" id="product-id">
+                <input type="text" id="name" placeholder="Nama produk" required>
+                <input type="text" id="image" placeholder="URL gambar" required>
+                <textarea id="desc" placeholder="Deskripsi produk" required></textarea>
+                <input type="text" id="kontak" placeholder="Kontak (WA/IG/dll)" required>
+                <button type="submit">Simpan Produk</button>
+            </form>
+        </section>
+
+        <div class="grid" id="product-grid"></div>
+    </div>
+
+    <script>
+        const password = prompt("Masukkan password admin:");
+        if (password !== "admin123") {
+            alert("Password salah!");
+            window.location.href = "index.html";
+        }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

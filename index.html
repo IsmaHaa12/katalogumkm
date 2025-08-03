@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog UMKM Desa Gombong</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header>
+    <h1>Katalog UMKM Desa Gombong</h1>
+    <input type="text" id="search" placeholder="Cari produk...">
+    <a href="admin.html" class="tambah-btn">➕ Tambah Produk</a>
+  </header>
+
+  <div class="container">
+    <div class="grid" id="product-grid"></div>
+  </div>
+
+  <footer>
+    <p>© 2025 UMKM Desa Gombong.</p>
+  </footer>
+
+  <!-- Modal Produk -->
+  <div id="product-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <img id="modal-image" src="" alt="">
+      <h3 id="modal-title"></h3>
+      <p id="modal-desc"></p>
+      <p><strong>Kontak:</strong> <span id="modal-kontak"></span></p>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
