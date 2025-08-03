@@ -5,7 +5,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase
 // 🔧 Konfigurasi Firebase (punya kamu)
 const firebaseConfig = {
   apiKey: "AIzaSyBy4VPjUXprmEtCn137wxrw15O5FlQKHrA",
-  authDomain: "umkmdesa-gombong.firebaseapp.com",
+  authDomain: "stellar-tulumba-011b9c.netlify.app",
   projectId: "umkmdesa-gombong",
   storageBucket: "umkmdesa-gombong.firebasestorage.app",
   messagingSenderId: "770086679112",
